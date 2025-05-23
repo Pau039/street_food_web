@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merlyn Street Food - E-commerce</title>
+  <link rel="stylesheet" href="jam.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    #cart-section {
+      position: fixed;
+      top: 80px;
+      right: 0;
+      width: 300px;
+      background: #e26b6b;
+      border-left: 2px solid #ccc;
+      padding: 1rem;
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+      z-index: 999;
+      display: none;
+      height: calc(100% - 80px);
+      overflow-y: auto;
+      animation: slideIn 0.3s ease-in-out;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    #cart-section ul li {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+    }
+    #cart-section ul li img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+  }
+  .qty-controls button {
+    padding: 4px 8px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #20c928;
+    color: #fff;
+  }
+  .qty-controls button:hover {
+    background-color: #e5673f;
+  }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: red;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #print-btn {
+      margin-top: 10px;
+    }
+    #close-cart {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">🔥 Street Food</div>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#cart" onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Delicious Filipino Street Food</h1>
+      <p>Order your favorites now!</p>
+      <a href="#menu" class="btn-primary">View Menu</a>
+    </div>
+  </section>
+
+  <section id="menu" class="menu">
+    <h2>Our Menu</h2>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <img src="barbecue.png" alt="Barbecue">
+        <h3>Barbecue</h3>
+        <p>20</p>
+        <button>Add to Cart</button>
+      </div>
+      <div class="menu-item">
+        <img src="intestine.png" alt="Chicken Intestine">
+        <h3>Chicken Intestine</h3>
+        <p>15</p>
+        <button>Add to Cart</button>
+      </div>
+      <div class="menu-item">
+        <img src="chead.png" alt="Chicken Head">
+        <h3>Chicken Head</h3>
+        <p>10</p>
+        <button>Add to Cart</button>
+      </div>
+      <div class="menu-item">
+        <img src="beta.png" alt="Chicken Blood">
+        <h3>Chicken Blood</h3>
+        <p>12</p>
+        <button>Add to Cart</button>
+      </div>
+      <div class="menu-item">
+        <img src="adidas.png" alt="Chicken Feet">
+        <h3>Chicken Feet</h3>
+        <p>18</p>
+        <button>Add to Cart</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="cart-section">
+    <button id="close-cart" onclick="toggleCart()">&times;</button>
+    <h2>Your Cart</h2>
+    <ul id="cart-list"></ul>
+    <p>Total: ₱<span id="cart-total">0</span></p>
+    <button onclick="showCheckoutForm()" class="btn-primary">Checkout</button>
+    <button id="print-btn" onclick="window.print()">Print Receipt</button>
+
+    <div id="checkout-form" style="display:none; margin-top:2rem;">
+      <h3>Delivery Details</h3>
+      <form onsubmit="submitOrder(event)">
+        <label>Name:<br><input type="text" id="cust-name" required></label><br><br>
+        <label>Address:<br><input type="text" id="cust-address" required></label><br><br>
+        <label>Phone Number:<br><input type="tel" id="cust-phone" required></label><br><br>
+        <label>Payment Method:<br>
+          <select id="cust-payment">
+            <option value="GCash">GCash</option>
+            <option value="Cash on Delivery">Cash on Delivery</option>
+          </select>
+        </label><br><br>
+        <button type="submit" class="btn-primary">Place Order</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; 2025 Street Food. All rights reserved.</p>
+    <div class="social-icons">
+      <a href="#"><i class="fab fa-facebook"></i></a>
+      <a href="#"><i class="fab fa-tiktok"></i></a>
+      <a href="#"><i class="fab fa-youtube"></i></a>
+    </div>
+  </footer>
+
+  <script>
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    function toggleCart() {
+      const cartSection = document.getElementById('cart-section');
+      cartSection.style.display = cartSection.style.display === 'block' ? 'none' : 'block';
+    }
+
+    document.querySelectorAll('.menu-item button').forEach(button => {
+      button.addEventListener('click', () => {
+        const item = button.closest('.menu-item');
+        const name = item.querySelector('h3').textContent;
+        const price = parseFloat(item.querySelector('p').textContent);
+        const image = item.querySelector('img').src;
+
+        const existingItem = cart.find(i => i.name === name);
+        if (existingItem) {
+          existingItem.qty++;
+        } else {
+          cart.push({ name, price, qty: 1, image });
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartDisplay();
+
+        const cartSection = document.getElementById('cart-section');
+        cartSection.style.display = 'block';
+        cartSection.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    function updateCartDisplay() {
+      document.getElementById('cart-count').textContent = cart.reduce((sum, i) => sum + i.qty, 0);
+
+      const list = document.getElementById('cart-list');
+      list.innerHTML = '';
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${item.image}" alt="${item.name}">
+          <div>
+            <strong>${item.name}</strong><br>
+            ₱${item.price * item.qty}
+            <div class="qty-controls">
+              <button onclick="changeQty(${index}, -1)">-</button>
+              ${item.qty}
+              <button onclick="changeQty(${index}, 1)">+</button>
+            </div>
+          </div>
+          <button class="remove-btn" onclick="removeItem(${index})">&times;</button>
+        `;
+        list.appendChild(li);
+        total += item.price * item.qty;
+      });
+
+      document.getElementById('cart-total').textContent = total;
+    }
+
+    function changeQty(index, delta) {
+      if (cart[index]) {
+        cart[index].qty += delta;
+        if (cart[index].qty <= 0) {
+          cart.splice(index, 1);
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartDisplay();
+      }
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartDisplay();
+    }
+
+    function showCheckoutForm() {
+      document.getElementById('checkout-form').style.display = 'block';
+    }
+
+    function submitOrder(event) {
+      event.preventDefault();
+      const name = document.getElementById('cust-name').value;
+      const address = document.getElementById('cust-address').value;
+      const phone = document.getElementById('cust-phone').value;
+      const payment = document.getElementById('cust-payment').value;
+
+      const orderSummary = cart.map(item => `${item.name} x${item.qty} = ₱${item.price * item.qty}`).join('\n');
+      const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+      alert(`Thank you ${name}!\n\nOrder Summary:\n${orderSummary}\n\nTotal: ₱${total}\n\nDelivery Address: ${address}\nPhone: ${phone}\nPayment: ${payment}`);
+
+      cart.length = 0;
+      localStorage.removeItem('cart');
+      updateCartDisplay();
+      document.getElementById('checkout-form').reset();
+    }
+
+    updateCartDisplay();
+  </script>
+</body>
+</html>
